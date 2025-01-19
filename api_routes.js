@@ -524,5 +524,59 @@ api_router.get("/branch_wise_report",async(req,res)=> {
 });
 
 
+api_router.get("/product_wise_report",async(req,res)=> {
+
+    
+    //let id = req.params.id;
+
+    let result = await Orderdetail.aggregate([
+        
+        {
+            $project: { orderNumber:1,productCode:1,
+                total : {
+                    $multiply: ["$quantityOrdered","$priceEach"]
+                }
+            }
+        } 
+       ,
+        {
+            $project: {
+                orderNumber:1,total:1,productCode:1,_id:0}
+            
+        },
+        
+        {
+            $lookup: {
+                from: "products",
+                localField: "productCode",
+                foreignField: "productCode",
+                as:"product"
+            }
+        },
+        {
+            $set : {
+                product : {
+                    $arrayElemAt : ['$product',0]
+                }
+            }
+        },
+        /*{
+            $match: {
+                "product.productLine": "Vintage Cars"
+            }
+        }*/
+       
+       {
+        $group: {
+            _id: "$product.productLine", total_orders: {$sum:1}, total_amount: {$sum: "$total"}
+        }
+       }
+       
+
+        ]);
+
+    res.json(result);
+});
+
 
 exports.api_routes = api_router;
