@@ -1,0 +1,342 @@
+db.f_prod.aggregate([
+    {
+        $match:{"price":{"$gt":20}}
+
+    }
+    ,
+
+    {$group:{
+         _id: "$category",mytotal:{$sum:1},t_price:{$sum:"$price"}
+    }
+},
+    {
+        $set:{
+            total:{$sum:["$rating.count",70000]}
+        }
+    }
+
+])
+
+
+
+db.f_prod.aggregate([
+    {
+        $project:{_id:0,category:1,"rating.count":1}
+
+    },
+
+    {$set: {
+        r_c: {$sum:["$rating.count",5000] }
+    }
+},
+
+    {
+        $project:{"rating":0}
+
+    },
+
+    {
+        $group: {
+            "_id": "$category" , "t_r_c": {$sum:"$r_c"}
+        }
+    },
+
+    {
+        $sort: {
+            "t_r_c":-1
+        }
+    }
+    
+
+])
+
+
+db.myusers.aggregate([
+    {
+        $group:{
+            _id: "$city", "Total_Users":{$sum:1}
+        }
+        
+    },
+        {
+        $sort:{
+            "Total_Users":-1
+        }
+    }
+])
+
+
+
+db.myusers.aggregate([
+    {
+        $group:{
+            _id: "$city", "Total_Users":{$sum:1} 
+        }
+        
+    },
+        {
+        $sort:{
+            "Total_Users":-1
+        }
+    }
+])
+
+
+db.myusers.aggregate([
+    {
+        $project:{
+            city:1,name:1,Tfriends:{$size:"$friends"},_id:0    
+        }
+    },
+       
+    
+])
+
+
+db.myusers.aggregate([
+    {
+        $project:{
+            city:1,Tfriends:{$size:"$friends"},_id:0    
+        }
+    },
+      {
+        $group: {
+            _id:"$city",users_in_city: {$sum:1}, friends_in_city: {$sum: "$Tfriends"}
+        }
+      },
+      
+      {
+        $set: {
+            "friend_per": {$multiply: [ {$divide: ["$users_in_city","$friends_in_city"] },100] } 
+        }
+      }
+    
+])
+
+
+db.myusers.aggregate([
+    {
+        $project:{
+            city:1,name:1,Tfriends:{$size:"$friends"},_id:0    
+        }
+    },
+      {
+        $group: {
+            _id:"$city",average_friends:{$avg:"$Tfriends"}
+        }
+      }
+      
+      
+    
+])
+
+
+
+db.myusers.aggregate([
+    {
+        $project:{
+            city:1,name:1,Tfriends:{$size:"$friends"},_id:0    
+        }
+    },
+      {
+        $group: {
+            _id:"$city",max_friends:{$max:"$Tfriends"}
+        }
+      }
+      
+      
+    
+])
+
+
+///////////////////////////////////////////////////////////////////////////////////
+
+
+db.customers.aggregate([
+    {
+        $project:{
+            customerName:1,customerNumber:1,country:1,_id:0    
+        }
+    },
+      {
+        $lookup: {
+            from: "payments",
+            localField: "customerNumber",
+            foreignField: "customerNumber",
+            as: "amount",
+          }
+      }
+   
+])
+
+
+
+db.customers.aggregate([
+    {
+        $project:{
+            customerName:1,customerNumber:1,country:1,_id:0    
+        }
+    },
+      {
+        $lookup: {
+            from: "payments",
+            localField: "customerNumber",
+            foreignField: "customerNumber",
+            as: "pay",
+          }
+      },
+
+      {
+            $project: {
+                customerName:1,customerNumber:1,country:1,"pay.amount":1
+             }
+        }
+ 
+   
+])
+
+
+
+db.customers.aggregate([
+    {
+        $project:{
+            customerName:1,customerNumber:1,country:1,_id:0    
+        }
+    },
+      {
+        $lookup: {
+            from: "payments",
+            localField: "customerNumber",
+            foreignField: "customerNumber",
+            as: "pay",
+          }
+      },
+
+      {
+            $project: {
+                customerName:1,customerNumber:1,country:1,"total":{$sum: '$pay.amount'}
+             }
+        },
+
+     
+])
+
+
+
+db.customers.aggregate([
+    {
+        $project:{
+            customerName:1,customerNumber:1,country:1,_id:0    
+        }
+    },
+      {
+        $lookup: {
+            from: "payments",
+            localField: "customerNumber",
+            foreignField: "customerNumber",
+            as: "pay",
+          }
+      },
+
+      {
+            $project: {
+                customerName:1,customerNumber:1,country:1,"total":{$sum: '$pay.amount'}
+             }
+        },
+
+        {
+            $group: {_id:"$country","country_total": {$sum: "$total"}}
+        },
+
+        {
+            $sort: {country_total:-1}
+        }
+        ,
+        {
+            $match: {country_total: {$ne: 0 }}
+        }
+
+     
+])
+
+
+
+db.customers.aggregate([
+    {
+        $project:{
+            customerName:1,customerNumber:1,country:1,_id:0    
+        }
+    },
+      {
+        $lookup: {
+            from: "payments",
+            localField: "customerNumber",
+            foreignField: "customerNumber",
+            as: "pay",
+          }
+      },
+
+      {
+            $project: {
+                customerName:1,customerNumber:1,country:1,"total":{$sum: '$pay.amount'}
+             }
+        },
+
+        {
+            $group: {_id:"$country","country_total": {$sum: "$total"}}
+        },
+
+        {
+            $sort: {country_total:-1}
+        }
+        ,
+        {
+            $match: {country_total: {$ne: 0 }}
+        }
+
+     
+])
+
+
+
+[
+    {
+        $project:{
+            customerName:1,customerNumber:1,country:1,_id:0  ,salesRepEmployeeNumber:1  
+        }
+    },
+      {
+        $lookup: {
+            from: "payments",
+            localField: "customerNumber",
+            foreignField: "customerNumber",
+            as: "pay",
+          }
+      },
+
+      {
+        $lookup: {
+            from: "employees",
+            localField: "salesRepEmployeeNumber",
+            foreignField: "employeeNumber",
+            as: "emp",
+          }
+      },
+
+      {
+            $project: {
+                customerName:1,customerNumber:1,country:1,emp_name:{ "$arrayElemAt": [ "$emp.lastName", 0 ] },"total":{$sum: '$pay.amount'}
+             }
+        },
+        {
+            $group: {
+                _id:"$emp_name",emp_total:{$sum:"$total" }
+            }
+        },
+        {
+            $sort: {"emp_total":-1}
+        }
+
+        
+     
+]

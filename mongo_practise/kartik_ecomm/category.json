@@ -1,0 +1,44 @@
+[
+    {
+      "id": 1,
+      "cat_name": "T-Shirts",
+      "cat_alias": "t_shirts",
+      "cat_details": ""
+    },
+    {
+      "id": 2,
+      "cat_name": "Shirts",
+      "cat_alias": "shirts",
+      "cat_details": ""
+    },
+    {
+      "id": 3,
+      "cat_name": "Jackets",
+      "cat_alias": "jackets",
+      "cat_details": ""
+    },
+    {
+      "id": 4,
+      "cat_name": "Shoes",
+      "cat_alias": "shoes",
+      "cat_details": ""
+    },
+    {
+      "id": 5,
+      "cat_name": "Jeans",
+      "cat_alias": "jeans",
+      "cat_details": ""
+    },
+    {
+      "id": 6,
+      "cat_name": "Watches",
+      "cat_alias": "watches",
+      "cat_details": ""
+    },
+    {
+      "id": 7,
+      "cat_name": "Sun Glasses",
+      "cat_alias": "sun_glasses",
+      "cat_details": ""
+    }
+  ]

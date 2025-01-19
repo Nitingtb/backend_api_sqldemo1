@@ -2,6 +2,9 @@ let express = require("express");
 
 let mongoose = require("mongoose");
 
+
+const {api_routes} = require("./api_routes");
+
 let URL = "mongodb+srv://nitingtb8:123Kartik@cluster0.jgoob.mongodb.net/sqldemo1";
 
 async function DB_Connect()
@@ -13,14 +16,10 @@ console.log("success!! database connected");
 }
 catch(err)
 {
-console.log("databse not connected");
+console.log("databse not connected: "+err);
 }
 
 }
-
-const CustomerSchema = mongoose.Schema({});
-
-const Customer = mongoose.model("Customer",CustomerSchema);
 
 
 
@@ -28,47 +27,13 @@ DB_Connect();
 
 server = express();
 
-server.get("/",async(req,res)=> {
+var cors = require('cors');
+server.use(cors());
 
-   /* let products = await Customer.aggregate([
-        {
-            $lookup:
-        
-        { from: 'payments', localField: 'customerNumber', foreignField: 'customerNumber', as: 'payments' } }
-    ]);*/
+server.use(express.json());  //for post data collect - req.body.
+server.use(express.urlencoded({ extended: true }))  //for post data collect - req.body.
 
 
-    let products = await Customer.aggregate([
-        {
-            $project:{
-                customerName:1,customerNumber:1,country:1,_id:0    
-            }
-        },
-          {
-            $lookup: {
-                from: "payments",
-                localField: "customerNumber",
-                foreignField: "customerNumber",
-                as: "pay",
-              }
-          },
-    
-          {
-                $project: {
-                    customerName:1,customerNumber:1,country:1,"pay.amount":1
-                 }
-            },
-            {
-                $project: {
-                    customerName:1,customerNumber:1,country:1,"total": {$sum: "$pay.amount" }
-                 }
-            }
-     
-       
-    ]);
-
-    res.json(products);
-});
-
+server.use("/",api_routes);
 
 server.listen(4000,()=> {console.log("server started on 4000...")});
