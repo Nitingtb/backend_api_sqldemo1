@@ -420,4 +420,109 @@ api_router.get("/emp_wise_report",async(req,res)=> {
 
 
 
+api_router.get("/branch_wise_report",async(req,res)=> {
+
+    
+    //let id = req.params.id;
+
+    let result = await Orderdetail.aggregate([
+        
+        {
+            $project: { orderNumber:1,productCode:1,
+                total : {
+                    $multiply: ["$quantityOrdered","$priceEach"]
+                }
+            }
+        } 
+        ,
+        {
+            $lookup: {
+                from: "orders",
+            localField: "orderNumber",
+            foreignField: "orderNumber",
+            as: "order",
+            }
+        }, 
+        {
+            $project: {
+                orderNumber:1,total:1,productCode:1,_id:0,order: {$arrayElemAt: ["$order",0]}
+            }
+        },
+        {
+            $group: {_id:"$orderNumber","total_amount": {$sum: "$total"},"order":{"$first":"$order"}}
+        },
+        {
+            $project: {
+                orderNumber:1,total_amount:1,orderDate:"$order.orderDate",customerNumber:"$order.customerNumber"
+            }
+        },
+        {
+            $lookup: {
+                from: "customers",
+                localField:"customerNumber",
+                foreignField:"customerNumber",
+                as:"customerDetails"
+            }
+        },
+
+        {
+            $set:
+            {
+                customerDetails:{$arrayElemAt: ["$customerDetails",0]}
+            }
+        },
+        {
+            $addFields: {
+                saleEmpNumber: "$customerDetails.salesRepEmployeeNumber"
+            }
+        },
+        {
+            $project: {
+                customerDetails:0
+            }
+        }
+        ,
+        {
+            $lookup: {
+                from: "employees",
+                localField:"saleEmpNumber",
+                foreignField:"employeeNumber",
+                as: "salesEmp"
+
+            }
+        },
+        {
+        $set: {
+            salesEmp: { $arrayElemAt: ["$salesEmp",0]}
+        }
+
+    },
+    {
+        $lookup: {
+            from: "offices",
+            localField: "salesEmp.officeCode",
+            foreignField: "officeCode",
+            as : "branch"
+        }
+    },
+    {
+        $set : {
+            branch: {
+                $arrayElemAt: ["$branch",0]
+            }
+        }
+    },
+    {
+        $group: {
+            _id: "$branch.officeCode",total_amount:{$sum:"$total_amount"},city: {$first:"$branch.city"}
+        }
+    }
+       
+        ]);
+
+    res.json(result);
+});
+
+
+
 exports.api_routes = api_router;
