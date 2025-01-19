@@ -12,7 +12,7 @@ const Customer = mongoose.model("Customer",CustomerSchema);
 
 const OrderSchema = mongoose.Schema({});
 
-const Order = mongoose.model("Order",OrderSchema);
+const Order = mongoose.models.Order || mongoose.model("Order",OrderSchema);
 
 
 const OrderdetailSchema = mongoose.Schema({});
@@ -570,13 +570,65 @@ api_router.get("/product_wise_report",async(req,res)=> {
         $group: {
             _id: "$product.productLine", total_orders: {$sum:1}, total_amount: {$sum: "$total"}
         }
-       }
-       
+       },
+      
 
         ]);
 
     res.json(result);
 });
+
+
+api_router.get("/check_report",async(req,res)=> {
+
+    
+    //let id = req.params.id;
+
+    let result = await Order.aggregate([
+        
+        {
+            $project: {
+                _id:0
+            },
+        },
+
+            {
+            $lookup : {
+                from: "orderdetails",
+                localField:"orderNumber",
+                foreignField:"orderNumber",
+                pipeline : [
+                    {
+                        $addFields: {
+                            amount: {$multiply: ["$priceEach","$quantityOrdered"]}
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: "$orderNumber", total_amount:{$sum:"$amount"}
+                        }
+                    },
+                    {
+                        $project: {_id:0}
+                    }
+                
+                ],
+                as : "orderDetails",
+                
+            }
+        },
+        {
+            $unwind: "$orderDetails"
+        }
+           
+        
+
+        ]);
+
+    res.json(result);
+});
+
+
 
 
 exports.api_routes = api_router;
