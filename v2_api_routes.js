@@ -201,4 +201,49 @@ function digit_count(a)
     return count;
 }
 
+
+
+v2_api_router.get("/check",async(req,res)=> {
+
+    
+    //let id = req.params.id;
+
+    let result = await Order.aggregate([
+        
+        {
+            $project: {
+                _id:0
+            },
+        },
+        {
+            $lookup : {
+                from: "orderdetails",
+                localField:"orderNumber",
+                foreignField:"orderNumber",
+                pipeline: [
+                    {
+                        $project : {
+                            productCode:1,quantityOrdered:1,priceEach:1
+                        
+                        }
+                    }
+                ],
+                   
+                as : "orderDetails"
+        } },
+        {
+            $unwind: "$orderDetails"
+        },
+        {
+            $addFields: {total: {$multiply:["$orderDetails.quantityOrdered", "$orderDetails.priceEach"] } }
+        }
+        
+    
+
+    ]);
+
+    res.json(result);
+
+});
+
 exports.v2_api_routes = v2_api_router;
