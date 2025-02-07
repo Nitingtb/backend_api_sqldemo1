@@ -166,7 +166,7 @@ v3_api_router.get("/order_report",async(req,res)=> {
                         $project : {_id:0 ,amount:{$multiply: ["$priceEach","$quantityOrdered"]}}
                     },
                     {
-                        $group: {_id:"orderNumber",total_amount:{$sum:"$amount"}}
+                        $group: {_id:"orderNumber",total_amount:{$sum:"$amount"},amount_values: {$push: "$amount"} }
                     }
                 ]
             }
@@ -176,7 +176,7 @@ v3_api_router.get("/order_report",async(req,res)=> {
         },
         {
             $addFields : {total_amount: "$orderDetails.total_amount"}
-        },
+        }  ,
         {
             $unset : "orderDetails"
         },
@@ -246,7 +246,17 @@ v3_api_router.get("/order_report",async(req,res)=> {
         },
         {
             $unset: "_id"
-        }
+        }/*,
+        {
+            $match: {
+                "month":"November"
+            }
+        },
+        {
+            $group: {
+                _id:"$month",tt:{$sum:"$total_amount"}
+            }
+        }*/
 
         
         
@@ -268,7 +278,7 @@ v3_api_router.get("/order_report",async(req,res)=> {
             for emp wise report */
 
 
-
+ 
 
         
         /*
