@@ -26,4 +26,16 @@ v4_api_router.post("/users",async(req,res)=> {
     
 });
 
+
+v4_api_router.delete("/users",async(req,res)=> {
+
+   let resp = await Emp.deleteOne(req.body.emp_del);
+
+    
+
+    res.json(resp);
+
+    
+});
+
 exports.v4_api_routes = v4_api_router;
