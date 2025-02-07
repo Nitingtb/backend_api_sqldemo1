@@ -38,4 +38,20 @@ v4_api_router.delete("/users",async(req,res)=> {
     
 });
 
+
+v4_api_router.put("/users",async(req,res)=> {
+
+    let upd = {...req.body.emp_upd}
+
+    delete upd.name;
+
+    let resp = await Emp.updateOne({name: req.body.emp_upd.name}, {$set:  upd } );
+ 
+     
+ 
+     res.json(resp); 
+ 
+     
+ });
+
 exports.v4_api_routes = v4_api_router;
