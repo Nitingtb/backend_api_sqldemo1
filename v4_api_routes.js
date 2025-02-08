@@ -45,9 +45,24 @@ v4_api_router.put("/users",async(req,res)=> {
 
     delete upd.name;
 
-    let resp = await Emp.updateOne({name: req.body.emp_upd.name}, {$set:  upd } );
+    let resp = await Emp.updateOne(  { name : { $regex : new RegExp(req.body.emp_upd.name, "i") } });
+ 
+     //console.log(req.body);
+
+    // console.log(upd);
+ 
+     res.json(resp); 
  
      
+ });
+
+
+ v4_api_router.get("/check/:name",async(req,res)=> {
+
+   
+    let resp = await Emp.findOne(  { name : { $regex : new RegExp(req.params.name, "i") } });
+ 
+    
  
      res.json(resp); 
  
