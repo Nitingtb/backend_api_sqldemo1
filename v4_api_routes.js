@@ -29,7 +29,9 @@ v4_api_router.post("/users",async(req,res)=> {
 
 v4_api_router.delete("/users",async(req,res)=> {
 
-   let resp = await Emp.deleteOne(req.body.emp_del);
+    var regex = new RegExp(["^", req.body.emp_del.name, "$"].join(""), "i");
+
+   let resp = await Emp.deleteOne({ name : regex });
 
     
 
@@ -45,24 +47,13 @@ v4_api_router.put("/users",async(req,res)=> {
 
     delete upd.name;
 
-    let resp = await Emp.updateOne(  { name : { $regex : new RegExp(req.body.emp_upd.name, "i") } });
+    var regex = new RegExp(["^", req.body.emp_upd.name, "$"].join(""), "i");
+
+    let resp = await Emp.updateOne(  { name : { $regex : regex } }, {$set:  upd } );
  
      //console.log(req.body);
 
     // console.log(upd);
- 
-     res.json(resp); 
- 
-     
- });
-
-
- v4_api_router.get("/check/:name",async(req,res)=> {
-
-   
-    let resp = await Emp.findOne(  { name : { $regex : new RegExp(req.params.name, "i") } });
- 
-    
  
      res.json(resp); 
  
