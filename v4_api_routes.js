@@ -21,7 +21,14 @@ v4_api_router.get("/users/:name",async(req,res)=> {
 
     let result = await Emp.findOne({name: regex}).lean();
 
+    if(result)
+    {
     res.json(result);
+    }
+    else
+    {
+        res.json({msg:"no employee found"})
+    }
 
 });
 
