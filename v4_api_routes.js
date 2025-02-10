@@ -33,6 +33,25 @@ v4_api_router.get("/users/:name",async(req,res)=> {
 });
 
 
+v4_api_router.get("/users/city/:city",async(req,res)=> {
+
+    var regex = new RegExp(["^", req.params.city, "$"].join(""), "i");
+
+    let result = await Emp.find({city: regex}).lean();
+
+    if(result)
+    {
+    res.json(result);
+    }
+    else
+    {
+        res.json({msg:"no employee found"})
+    }
+
+});
+
+
+
 v4_api_router.post("/users",async(req,res)=> {
 
     let result = new Emp(req.body);
