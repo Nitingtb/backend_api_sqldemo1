@@ -15,6 +15,17 @@ v4_api_router.get("/users",async(req,res)=> {
 });
 
 
+v4_api_router.get("/users/:name",async(req,res)=> {
+
+    var regex = new RegExp(["^", req.params.name, "$"].join(""), "i");
+
+    let result = await Emp.findOne({name: regex}).lean();
+
+    res.json(result);
+
+});
+
+
 v4_api_router.post("/users",async(req,res)=> {
 
     let result = new Emp(req.body);
