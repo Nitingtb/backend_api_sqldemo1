@@ -128,6 +128,9 @@ v3_api_router.get("/product_report",async(req,res)=> {
         
        {
         $addFields : { status : { $cond : [ {$lte :[ "$remaining_quantity", 0] } , "Out Of Stock" , "In Stock"   ] } }
+    },
+    {
+        $limit : 30
     }
      
     ]);
