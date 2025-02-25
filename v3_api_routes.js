@@ -141,6 +141,67 @@ v3_api_router.get("/product_report",async(req,res)=> {
 
 
 
+v3_api_router.get("/product_report/:pr_name",async(req,res)=> {
+
+    var regex = new RegExp(["^", req.params.pr_name, "$"].join(""), "i");
+
+    let result = await Product.aggregate([
+       
+        {
+            $project: {_id:0,productCode:1,productName:1,quantityInStock:1}
+        },
+        {
+            $lookup: {
+                from:"orderdetails",
+                localField:"productCode",
+                foreignField:"productCode",
+                as: "OrderDetails",
+                pipeline: [
+                    {
+                        $group: {
+                            _id:"$productCode",total_quantity_order:{$sum: "$quantityOrdered"}
+                        }
+                    }
+                    
+                ]
+            }
+        },
+        {
+            $unwind: "$OrderDetails"
+        },
+        {
+            $addFields: {total_quantity_order: "$OrderDetails.total_quantity_order"}
+        },
+        {
+            $unset: "OrderDetails"
+        },
+        {
+            $addFields: {remaining_quantity: {$subtract: ["$quantityInStock" , "$total_quantity_order"]}}
+        },
+        
+       {
+        $addFields : { status : { $cond : [ {$lte :[ "$remaining_quantity", 0] } , "Out Of Stock" , "In Stock"   ] } }
+    },
+    {
+        $match: {"productName": { $regex: new RegExp(req.params.pr_name, 'i') } } //}
+    },
+    {
+        $limit : 30 
+    }
+     
+    ]);
+
+    if(result.length==0)
+    {
+        res.json({msg:"* No Product Found with this name"})
+    }
+    else {
+    res.json(result); }
+
+});
+
+
+
 v3_api_router.get("/order_report",async(req,res)=> {
 
     let result = await Order.aggregate([
