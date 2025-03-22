@@ -56,9 +56,9 @@ v4_api_router.post("/users",async(req,res)=> {
 
     let result = new Emp(req.body);
 
-    await result.save();
+    let resp = await result.save();
 
-    res.json({id:result._id});
+    res.json(resp);
 
     
 });
